@@ -9,6 +9,9 @@
   "author": "Roger",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.3"
+    "aviation-json": "^0.3.1",
+    "express": "^4.16.3",
+    "us-baby-names": "^1.0.0",
+    "big-bang-theory": "git+https://git@github.com/rogerjaffe/big-bang-theory.git"
   }
 }
