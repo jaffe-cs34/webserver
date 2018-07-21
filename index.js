@@ -1,5 +1,8 @@
 // Import the express javascript library
 var express = require('express');
+// US Baby Name data comes from Social Security
+// Library documentation is at https://www.npmjs.com/package/us-baby-names
+const { byName, byYear } = require('us-baby-names');
 
 // Instantiate a server
 var app = express();
@@ -7,12 +10,77 @@ var app = express();
 // Set the port number to be compatible with Cloud 9
 const PORT = 8080;
 
-// Respond with "hello world" when a GET request is made
+// Respond with "hello world" when a GET request with no path is made
 app.get('/', function (req, res) {
   // Send the text back to the client in response to the request
   res.send('Hello world -- My server is working!!!');
   // Log a message to the terminal window
   console.log((new Date()).toString()+' Message served to the client');
+})
+
+// Utility function to convert a name to capitalize first letter
+// Database has capital first letter for all names
+// roger => Roger; ROGER -> Roger
+const fixName = function(name) {
+  let newName = name.toLowerCase();
+  newName = newName.charAt(0).toUpperCase() + newName.substr(1)
+  return newName
+}
+
+// Transform the data object elements into an
+// HTML table
+const formatToHTML = function(dataArr) {
+  // If dataArr is undefined or null, make it an empty array
+  if (!dataArr) {
+    dataArr = [];
+  }
+  // Use the Array.map function to convert each record into an
+  // HTML table element.
+  dataArr = dataArr.map(item => {
+    // Create the HTML here
+    let html = '<tr>'
+    html += (item.year) ? '<td>'+item.year+'</td>' : '';
+    html += (item.name) ? '<td>'+item.name+'</td>' : '';
+    html += (item.sex) ? '<td>'+item.sex+'</td>' : '';
+    html += (item.count) ? '<td>'+item.count+'</td>' : '';
+    html += '</tr>';
+    return html
+  })
+  // Now join all the elements together inside the <table><tbody>
+  // elements.
+  return '<table><tbody>'+dataArr.join('')+'</tbody></table>';
+}
+
+// Path 1: /baby-name/<name>
+app.get('/baby-name/:name', function(req, res) {
+  let data = byName[fixName(req.params.name)];
+  res.send(formatToHTML(data));
+})
+
+// Path 2: /baby-name/<name>/<year>
+app.get('/baby-name/:name/:year', function(req, res) {
+  let data = byName[fixName(req.params.name)];
+  if (!data) data = [];
+  // Check to see if the year matches what's requested.
+  // item.year is a number but req.params.year is a string
+  // so we need to add '' to the number to convert it to 
+  // a string so that the types match when they're compared
+  data = data.filter(item => item.year+'' === req.params.year);
+  res.send(formatToHTML(data));
+})
+
+// Path 7: /baby-year/<year>/<letter>
+// Babies born in <year> and names starting with <letter>
+app.get('/baby-year/:year/:letter', function(req, res) {
+  let data = byYear[req.params.year];
+  if (!data) data = [];
+  data = data.filter(item => item.name.charAt(0).toLowerCase() === req.params.letter.toLowerCase());
+  data = data.sort((a,b) => {
+    if (a.name < b.name) return -1;
+    if (a.name > b.name) return 1;
+    return 0;
+  })
+  res.send(formatToHTML(data));
 })
 
 // Set up the server to 'listen' to requests on port 8080
