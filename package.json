@@ -12,7 +12,7 @@
     "aviation-json": "^0.3.1",
     "big-bang-theory": "git+https://git@github.com/rogerjaffe/big-bang-theory.git",
     "express": "^4.16.3",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "sprintf-js": "^1.1.1",
     "us-baby-names": "^1.0.0"
   }
